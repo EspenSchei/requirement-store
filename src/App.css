@@ -1,38 +1,63 @@
-.App {
+body {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 30s ease infinite;
+  height: 100%;
+  margin: 0;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+#wrapper {
+  min-height: 100%;
   text-align: center;
+  padding: 150px;
+  margin-bottom: 70%;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+a {
+  text-decoration: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+input {
+  border-style: none;
+  background: transparent;
+  outline: none;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.webflow-style-input {
+  position: relative;
+  display: -webkit-box;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  flex-direction: row;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 2px;
+  padding: 1.4rem 2rem 1.6rem;
+  background: rgba(57, 63, 84, 0.8);
 }
 
-.App-link {
-  color: #61dafb;
+.webflow-style-input input {
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+  color: #bfd2ff;
+  font-size: 1.8rem;
+  line-height: 1.5rem;
+  vertical-align: middle;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.webflow-style-input input::-webkit-input-placeholder {
+  color: #7881a1;
 }
