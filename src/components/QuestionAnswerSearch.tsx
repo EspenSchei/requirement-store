@@ -82,7 +82,7 @@ const QuestionAnswerSearch = (props: Props) => {
                   <td>
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: qa.answer.replace(/\n/, '<br /><br />'),
+                        __html: qa.answer.replace(/\n/g, '<br /><br />'),
                       }}
                     />
                   </td>
