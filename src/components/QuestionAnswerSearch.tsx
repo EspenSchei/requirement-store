@@ -42,15 +42,15 @@ const QuestionAnswerSearch = (props: Props) => {
   }, [props, requirementDocuments]);
 
   function getUniqueDocuments(): number {
-    return new Set(filteredQaList.map((qa) => qa.customer)).size;
+    return new Set(filteredQaList.map((qa) => qa.customer + qa.date)).size;
   }
 
   return (
     <div>
       {props.question.length > 0 ? (
         <p>
-          {filteredQaList.length} results for <strong>{props.question}</strong>{' '}
-          with {getUniqueDocuments()} client
+          Found {filteredQaList.length} results for{' '}
+          <strong>{props.question}</strong> in {getUniqueDocuments()} document
           {filteredQaList.length > 1 ? 's' : ''}.
         </p>
       ) : (
