@@ -1,27 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {
-  RequirementDocument,
-  getRequirementDocuments,
-} from '../services/QADocumentService';
+import { getRequirementDocuments } from '../services/QADocumentService';
 import Fuse from 'fuse.js';
 
 const QuestionAnswerSearch = (props: Props) => {
   const [fuse, setFuse] = useState<any>(null);
   const [stats, setStats] = useState<{ qaCount: number; docCount: number }>();
-  const [filteredQaList, setFilteredQaList] = useState<QAOut[]>([]);
-  const [requirementDocuments, setRequirementDocuments] = useState<
-    RequirementDocument[]
-  >([]);
+  const [results, setResults] = useState<SearchItem[]>([]);
 
   useEffect(() => {
     const requirementDocs = getRequirementDocuments();
-    setRequirementDocuments(requirementDocs);
+    let requirements: SearchItem[] = [];
 
-    let answerCount: number = 0;
-    let requirements: QAOut[] = [];
     requirementDocs.forEach((doc) => {
       doc.requirements.forEach((req) => {
-        answerCount++;
         requirements.push({
           question: req.question,
           answer: req.answer,
@@ -37,7 +28,10 @@ const QuestionAnswerSearch = (props: Props) => {
       threshold: 0.0,
     });
 
-    setStats({ qaCount: answerCount, docCount: requirementDocs.length });
+    setStats({
+      qaCount: requirements.length,
+      docCount: requirementDocs.length,
+    });
     setFuse(reqFuse);
   }, []);
 
@@ -50,45 +44,42 @@ const QuestionAnswerSearch = (props: Props) => {
       ],
     });
 
-    const filteredQAs: QAOut[] = [];
-    result?.forEach((res: any) => {
-      filteredQAs.push({
+    const newResults: SearchItem[] = result?.map((res: any) => {
+      return {
         question: res.item.question,
         answer: res.item.answer,
         customer: res.item.customer,
         date: res.item.date,
-      });
+      };
     });
 
-    setFilteredQaList(filteredQAs);
-  }, [props, requirementDocuments]);
+    setResults(newResults || []);
+  }, [props, fuse]);
 
   function getUniqueDocuments(): number {
-    return new Set(filteredQaList.map((qa) => qa.customer + qa.date)).size;
+    return new Set(results.map((qa) => qa.customer + qa.date)).size;
   }
 
   return (
     <div>
       {props.question.length > 0 ? (
         <p>
-          Found {filteredQaList.length} results for{' '}
-          <strong>{props.question}</strong> in {getUniqueDocuments()} document
-          {filteredQaList.length > 1 ? 's' : ''}.
+          Found {results.length} results for <strong>{props.question}</strong>{' '}
+          in {getUniqueDocuments()} document{results.length > 1 ? 's' : ''}.
         </p>
       ) : (
         <div>
           {stats ? (
             <p>
               {stats.qaCount} question{stats.qaCount > 1 ? 's' : ''} loaded from{' '}
-              {stats.docCount} document
-              {stats.docCount > 1 ? 's' : ''}.
+              {stats.docCount} document{stats.docCount > 1 ? 's' : ''}.
             </p>
           ) : (
             'Loading...'
           )}
         </div>
       )}
-      {filteredQaList.length > 0 && props.question ? (
+      {results.length > 0 && props.question ? (
         <table>
           <tbody>
             <tr>
@@ -97,7 +88,7 @@ const QuestionAnswerSearch = (props: Props) => {
               <th>Source</th>
               <th>ReqDate</th>
             </tr>
-            {filteredQaList
+            {results
               .sort((a, b) => b.date.getTime() - a.date.getTime())
               .map((qa, index) => (
                 <tr key={index}>
@@ -123,7 +114,7 @@ const QuestionAnswerSearch = (props: Props) => {
   );
 };
 
-type QAOut = {
+type SearchItem = {
   question: string;
   answer: string;
   customer: string;
