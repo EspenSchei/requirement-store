@@ -3,8 +3,10 @@ import {
   RequirementDocument,
   getRequirementDocuments,
 } from '../services/QADocumentService';
+import Fuse from 'fuse.js';
 
 const QuestionAnswerSearch = (props: Props) => {
+  const [fuse, setFuse] = useState<any>(null);
   const [stats, setStats] = useState<{ qaCount: number; docCount: number }>();
   const [filteredQaList, setFilteredQaList] = useState<QAOut[]>([]);
   const [requirementDocuments, setRequirementDocuments] = useState<
@@ -12,30 +14,50 @@ const QuestionAnswerSearch = (props: Props) => {
   >([]);
 
   useEffect(() => {
-    setRequirementDocuments(getRequirementDocuments());
+    const requirementDocs = getRequirementDocuments();
+    setRequirementDocuments(requirementDocs);
+
+    let answerCount: number = 0;
+    let requirements: QAOut[] = [];
+    requirementDocs.forEach((doc) => {
+      doc.requirements.forEach((req) => {
+        answerCount++;
+        requirements.push({
+          question: req.question,
+          answer: req.answer,
+          customer: doc.customer,
+          date: doc.date,
+        });
+      });
+    });
+
+    const reqFuse = new Fuse(requirements, {
+      keys: ['question', 'answer'],
+      useExtendedSearch: true,
+      threshold: 0.0,
+    });
+
+    setStats({ qaCount: answerCount, docCount: requirementDocs.length });
+    setFuse(reqFuse);
   }, []);
 
+  // Triggered every time the "question" in props is changed
   useEffect(() => {
+    const result = fuse?.search({
+      $or: [
+        { question: `'${props.question}` },
+        { answer: `'${props.question}` },
+      ],
+    });
+
     const filteredQAs: QAOut[] = [];
-    let answerCount: number = 0;
-
-    requirementDocuments.forEach((doc) => {
-      answerCount += doc.requirements.length;
-      doc.requirements.forEach((req) => {
-        if (
-          props.question.length > 0 &&
-          (req.answer.toLowerCase().includes(props.question.toLowerCase()) ||
-            req.question.toLowerCase().includes(props.question.toLowerCase()))
-        )
-          filteredQAs.push({
-            question: req.question,
-            answer: req.answer,
-            customer: doc.customer,
-            date: doc.date,
-          });
+    result?.forEach((res: any) => {
+      filteredQAs.push({
+        question: res.item.question,
+        answer: res.item.answer,
+        customer: res.item.customer,
+        date: res.item.date,
       });
-
-      setStats({ qaCount: answerCount, docCount: requirementDocuments.length });
     });
 
     setFilteredQaList(filteredQAs);
@@ -58,7 +80,8 @@ const QuestionAnswerSearch = (props: Props) => {
           {stats ? (
             <p>
               {stats.qaCount} question{stats.qaCount > 1 ? 's' : ''} loaded from{' '}
-              {stats.docCount} document{stats.docCount > 1 ? 's' : ''}.
+              {stats.docCount} document
+              {stats.docCount > 1 ? 's' : ''}.
             </p>
           ) : (
             'Loading...'
