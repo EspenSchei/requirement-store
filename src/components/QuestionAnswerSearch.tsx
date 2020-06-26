@@ -23,7 +23,7 @@ const QuestionAnswerSearch = (props: Props) => {
     });
 
     const reqFuse = new Fuse(requirements, {
-      keys: ['question', 'answer'],
+      keys: ['question', 'answer', 'customer'],
       useExtendedSearch: true,
       threshold: 0.0,
     });
@@ -41,6 +41,7 @@ const QuestionAnswerSearch = (props: Props) => {
       $or: [
         { question: `'${props.question}` },
         { answer: `'${props.question}` },
+        { customer: `'${props.question}` },
       ],
     });
 
@@ -61,7 +62,7 @@ const QuestionAnswerSearch = (props: Props) => {
   }
 
   return (
-    <div>
+    <>
       {props.question.length > 0 ? (
         <p>
           Found {results.length} results for <strong>{props.question}</strong>{' '}
@@ -79,7 +80,7 @@ const QuestionAnswerSearch = (props: Props) => {
           )}
         </div>
       )}
-      {results.length > 0 && props.question ? (
+      {results.length > 0 && props.question && (
         <table>
           <tbody>
             <tr>
@@ -109,8 +110,8 @@ const QuestionAnswerSearch = (props: Props) => {
               ))}
           </tbody>
         </table>
-      ) : null}
-    </div>
+      )}
+    </>
   );
 };
 
